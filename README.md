@@ -34,18 +34,51 @@ pip install -r requirements.txt
 
 ## Smarter Scheduling
 
-PawPal+ goes beyond a basic task list with several algorithmic features built into the `Scheduler` class:
+PawPal+ goes beyond a basic task list with several algorithmic features built into the `Scheduler` class: <br>
 
-**Conflict detection** — `detect_conflicts()` scans the daily plan for tasks that share the same time slot and returns a plain-English warning for each collision. It never raises an exception or modifies the schedule — the caller decides how to handle it.
+Conflict detection — `detect_conflicts()` checks if multiple tasks are assigned to the same time slot and returns a simple warning for each overlap. It doesn’t change anything in the schedule, instead it just flags the issue so you can decide what to do. <br>
 
-**Chronological sorting** — `sort_by_time()` returns the daily plan ordered from earliest to latest using a lambda key on zero-padded `"HH:MM"` strings, where lexicographic order equals chronological order.
+Chronological sorting — `sort_by_time()` makes sure tasks are ordered from earliest to latest. It uses a simple trick with "HH:MM" time strings so they naturally sort in the correct order. <br>
 
-**Filtering** — `filter_by_pet(name)` and `filter_by_completion(bool)` let you slice the plan by pet or by done/pending status. Both are non-destructive and return new lists.
+Filtering— `filter_by_pet(name)` and `filter_by_completion(bool)` Makes it so you can filter tasks by pet or by completion status using filter_by_pet() and filter_by_completion(). These don’t modify the original list, but they just give you a filtered view. <br>
 
-**Automatic recurrence** — `mark_task_complete()` calls `task.next_occurrence()` after marking a task done. For `"daily"` tasks it uses `timedelta(days=1)` to calculate tomorrow's due date; for `"weekly"` tasks it uses `timedelta(weeks=1)`. The new Task instance is automatically added back to the pet so the next call to `generate_daily_plan()` picks it up. `"as-needed"` tasks do not recur.
+Automatic recurrence —  When you complete a task, `mark_task_complete()` can automatically create the next one. Daily tasks get pushed to tomorrow, weekly tasks to next week, and “as-needed” tasks don’t repeat. The new task is added back to the pet so it shows up in future schedules. <br>
 
-**Medical priority boost** — when a pet has a recorded medical condition, the scheduler automatically raises the priority of that pet's `MEDICATION` tasks (up to a max of 5) before sorting, so critical care is never pushed out by lower-priority activities.
+Medical priority boost — If a pet has a medical condition, their medication tasks automatically get bumped up in priority (up to a max of 5). This makes sure important care doesn’t get pushed aside by less urgent tasks. <br>
 
+---
+
+## Testing PawPal+
+
+### Run the tests
+
+```bash
+python -m pytest tests/ -v
+```
+
+### What the tests cover
+
+test_task_completion<br>
+Makes sure calling complete() actually updates the task from not done → done. <br>
+
+test_add_task_increases_pet_task_count<br>
+Confirms that when you add a task to a pet, it’s really stored (count goes from 0 to 1).<br>
+
+test_sort_by_time_returns_chronological_order<br>
+Checks that even if tasks are added out of order, they come back sorted from earliest to latest.
+
+test_recurrence_creates_next_day_task<br>
+Verifies that completing a daily task both marks it done and creates a new one for the next day.<br>
+
+
+test_detect_conflicts_flags_duplicate_slots<br>
+Ensures that two tasks in the same time slot trigger a conflict warning, while a single task does not.<br>
+
+### Confidence level 4/5
+
+The main features are all tested and working—task completion, managing tasks for pets, sorting, handling recurring tasks, and detecting conflicts.
+
+The only reason it’s not a full 5 is because some edge cases aren’t covered yet. For example: what happens if the owner has no time available, if every time slot is already filled, or if a weekly task is completed multiple times in one day. The system likely handles these, but they just aren’t tested yet.
 ---
 
 ### Suggested workflow
