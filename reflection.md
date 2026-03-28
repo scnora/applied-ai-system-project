@@ -2,7 +2,7 @@
 
 ## 1. System Design
 -- Sarai --
-//three core actions: add a pet, schedule event, did the pet eat, walk, meds, etc
+three core actions: add a pet, schedule event, did the pet eat, walk, meds, etc
 
 attributes: pet type, breed, age, name, 
 methods: go on walk, takemeds, addevent, getschedule
@@ -13,11 +13,15 @@ methods: go on walk, takemeds, addevent, getschedule
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
+The initial design of the UML is a easy way to take all the pet's needs and builds a daily schedule for the owner based on the time and priorities. The classes I have are Owner, Pet, Task, Scheduler, and ScheduledTask. The owner has a pet and pet can have 0 or more tasks. The scheduler plans for the owner and produces a ScheduledTask which then gives these Tasks to the pet. 
+
+
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
 
+I did make some design changes during implementation. I changed the TIME_OF_DAY_MAP to prevents a runtime error by inlining values, and the add_event_to_schedule docstring shows expected behavior when no scheduler exists. I also made some improvements like changing ScheduledTask.pet_name to a Pet reference and adding a frequency field to Task ensure data stays consistent and supports recurring scheduling. Finally, clear_completed_tasks() and reset_plan() were added to prevent data buildup and duplication, keeping the system clean across multiple scheduling runs.
 ---
 
 ## 2. Scheduling Logic and Tradeoffs

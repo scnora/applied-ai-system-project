@@ -28,6 +28,7 @@ class Task:
     priority: int                        # 1 (low) → 5 (critical)
     preferred_time: str = "anytime"      # "morning" | "afternoon" | "evening" | "anytime"
     notes: str = ""
+    frequency: str = "daily"             # "daily" | "weekly" | "as-needed"
     is_completed: bool = False
     scheduled_time: str | None = None
 
@@ -81,14 +82,23 @@ class Pet:
         """Record a medical condition that may affect scheduling."""
         pass
 
+    def clear_completed_tasks(self):
+        """Remove all tasks marked as completed from this pet's task list."""
+        pass
+
 
 @dataclass
 class ScheduledTask:
     """A Task that has been assigned a time slot with an explanation."""
     task: Task
     scheduled_time: str
-    pet_name: str
+    pet: Pet                             # full Pet reference instead of just a name string
     reason: str                          # why the scheduler chose this slot
+
+    @property
+    def pet_name(self) -> str:
+        """Convenience accessor so display code can still use .pet_name."""
+        return self.pet.name
 
 
 # ─────────────────────────────────────────────
@@ -126,7 +136,8 @@ class Owner:
         pass
 
     def add_event_to_schedule(self, task: Task, pet: Pet):
-        """Add a one-off task to a pet and regenerate the schedule."""
+        """Add a one-off task to a pet and regenerate the schedule.
+        Creates the Scheduler if it doesn't exist yet."""
         pass
 
 
@@ -141,7 +152,9 @@ class Scheduler:
         "morning":   ["07:00", "08:00", "09:00", "10:00"],
         "afternoon": ["11:00", "12:00", "13:00", "14:00", "15:00"],
         "evening":   ["16:00", "17:00", "18:00", "19:00", "20:00"],
-        "anytime":   TIME_SLOTS,
+        "anytime":   ["07:00", "08:00", "09:00", "10:00", "11:00",
+                      "12:00", "13:00", "14:00", "15:00", "16:00",
+                      "17:00", "18:00", "19:00", "20:00"],
     }
 
     def __init__(self, owner: Owner):
@@ -175,4 +188,8 @@ class Scheduler:
 
     def _check_time_constraints(self, task: Task) -> bool:
         """Return True if adding this task still fits within the owner's available time."""
+        pass
+
+    def reset_plan(self):
+        """Clear the current daily plan and reset the scheduled minutes counter."""
         pass
