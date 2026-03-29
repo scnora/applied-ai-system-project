@@ -32,6 +32,46 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+## Features 
+**Time-based sorting**
+Tasks are automatically ordered from earliest to latest using "HH:MM" formatting, so the daily plan always appears in a clean, chronological order.<br>
+
+
+**Conflict detection (warnings only)**
+The scheduler checks for tasks assigned to the same time slot and returns simple warnings. It doesn’t modify the schedule, giving the user flexibility to handle conflicts. <br>
+
+**Priority-based scheduling**
+Tasks are scheduled based on priority levels, ensuring that more important tasks (like feeding or medication) are handled before less urgent ones. <br>
+
+
+**Time constraint handling**
+The system respects the owner’s available time per day and only schedules tasks that can realistically fit within that limit. <br>
+
+**Task filtering**
+Users can filter tasks by pet or by completion status (done vs. pending) without changing the original schedule.<br>
+
+**Automatic recurrence**
+Completing a task can generate its next occurrence. Daily tasks repeat the next day, weekly tasks repeat the next week, and one-time tasks do not repeat.<br>
+
+
+**Medical priority boost**
+Pets with medical conditions automatically have their medication tasks boosted in priority, making sure critical care is never deprioritized.<br>
+
+**Non-destructive operations**
+Features like sorting and filtering return new lists instead of modifying existing data, reducing bugs and keeping the system predictable.<br>
+
+**Schedule reset support**
+The scheduler can reset its plan before regenerating, preventing duplicate tasks and keeping daily plans accurate across multiple runs. <br>
+
+## Demo 
+
+
+<img src="img/MainPage.png" alt="Owner Info" width="400" height="300">
+<img src="img/Pet.png" alt="Add Pet" width="400" height="300">
+<img src="img/Task.png" alt="Task" width="400" height="300">
+<img src="img/Schedule.png" alt="Schedule" width="400" height="300">
+
+
 ## Smarter Scheduling
 
 PawPal+ goes beyond a basic task list with several algorithmic features built into the `Scheduler` class: <br>

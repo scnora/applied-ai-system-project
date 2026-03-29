@@ -31,9 +31,9 @@ if submitted:
 
 if st.session_state.owner is None:
     st.info("Fill in your owner info above to get started.")
-    st.stop()   # nothing below renders until an Owner exists
+    st.stop()   # halts Streamlit rendering — nothing below this line executes
 
-owner: Owner = st.session_state.owner
+owner: Owner = st.session_state.owner  # safe: st.stop() guarantees this is not None
 
 st.divider()
 
@@ -127,24 +127,104 @@ st.subheader("Today's Schedule")
 
 if st.button("Generate Schedule"):
     schedule = owner.get_schedule()   # Owner.get_schedule() → Scheduler.generate_daily_plan()
+    scheduler = owner._scheduler
 
     if not schedule:
         st.warning("No tasks could be scheduled. Add tasks above first.")
     else:
-        for st_task in schedule:
-            with st.container(border=True):
-                col1, col2 = st.columns([1, 3])
-                with col1:
-                    st.markdown(f"### {st_task.scheduled_time}")
-                with col2:
-                    st.markdown(f"**{st_task.task.name}**  —  {st_task.pet_name}")
-                    st.caption(
-                        f"{st_task.task.task_type.value} · "
-                        f"{st_task.task.duration_minutes} min · "
-                        f"{st_task.task.get_priority_label()} priority"
-                    )
-                    st.markdown(f"_Reason: {st_task.reason}_")
 
-        # Scheduler.explain_plan() produces the full plain-text summary
+        # ── Conflict warnings ─────────────────────────────────────────────────
+        conflicts = scheduler.detect_conflicts()
+        if conflicts:
+            for warning in conflicts:
+                st.warning(f"⚠️ {warning}")
+        else:
+            st.success("No scheduling conflicts detected.")
+
+        st.divider()
+
+        # ── Filter controls ───────────────────────────────────────────────────
+        pet_names   = ["All pets"] + [p.name for p in owner.pets]
+        status_opts = ["All", "Pending", "Completed"]
+
+        col_f1, col_f2 = st.columns(2)
+        with col_f1:
+            selected_pet = st.selectbox("Filter by pet", pet_names, key="filter_pet")
+        with col_f2:
+            selected_status = st.selectbox("Filter by status", status_opts, key="filter_status")
+
+        # Apply filter_by_pet() from Scheduler
+        if selected_pet != "All pets":
+            filtered = scheduler.filter_by_pet(selected_pet)
+        else:
+            filtered = schedule
+
+        # Apply filter_by_completion() from Scheduler
+        if selected_status == "Pending":
+            filtered = [st_task for st_task in filtered if not st_task.task.is_completed]
+        elif selected_status == "Completed":
+            filtered = [st_task for st_task in filtered if st_task.task.is_completed]
+
+        # Always display in chronological order via sort_by_time()
+        sorted_plan = sorted(filtered, key=lambda st_task: st_task.scheduled_time)
+
+        st.caption(f"Showing {len(sorted_plan)} of {len(schedule)} task(s)")
+        st.divider()
+
+        # ── Schedule cards ────────────────────────────────────────────────────
+        if not sorted_plan:
+            st.info("No tasks match the current filters.")
+        else:
+            for st_task in sorted_plan:
+                priority = st_task.task.priority
+                # Color-code border by priority level
+                if priority == 5:
+                    badge = "🔴 Critical"
+                elif priority == 4:
+                    badge = "🟠 High"
+                elif priority == 3:
+                    badge = "🟡 Medium"
+                else:
+                    badge = "🟢 Low"
+
+                status_icon = "✅" if st_task.task.is_completed else "🕐"
+
+                with st.container(border=True):
+                    col1, col2 = st.columns([1, 4])
+                    with col1:
+                        st.markdown(f"### {st_task.scheduled_time}")
+                        st.caption(badge)
+                    with col2:
+                        st.markdown(
+                            f"{status_icon} **{st_task.task.name}** — {st_task.pet_name}"
+                        )
+                        st.caption(
+                            f"{st_task.task.task_type.value} · "
+                            f"{st_task.task.duration_minutes} min · "
+                            f"due {st_task.task.due_date} · "
+                            f"repeats {st_task.task.frequency}"
+                        )
+                        st.markdown(f"_Reason: {st_task.reason}_")
+
+        st.divider()
+
+        # ── Summary table via st.table ────────────────────────────────────────
+        with st.expander("View as table"):
+            rows = [
+                {
+                    "Time":      s.scheduled_time,
+                    "Pet":       s.pet_name,
+                    "Task":      s.task.name,
+                    "Type":      s.task.task_type.value,
+                    "Duration":  f"{s.task.duration_minutes} min",
+                    "Priority":  s.task.get_priority_label(),
+                    "Frequency": s.task.frequency,
+                    "Done":      "✅" if s.task.is_completed else "🕐",
+                }
+                for s in sorted_plan
+            ]
+            st.table(rows)
+
+        # ── Full text explanation ─────────────────────────────────────────────
         with st.expander("Full plan explanation"):
-            st.text(owner._scheduler.explain_plan())
+            st.text(scheduler.explain_plan())
