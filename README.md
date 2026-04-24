@@ -6,6 +6,9 @@
 PawPal+ was built as a Streamlit app to help busy pet owners manage daily care tasks across multiple pets. The original system allowed users to enter owner and pet information, add care tasks with priorities and durations, and generate a daily schedule using a rule-based `Scheduler` class. It included smart features like medical priority boosting, conflict detection, automatic task recurrence, and chronological sorting 
 ---
 
+<video src="/assets/pawpet.mp4" width="400" controls></video>
+
+
 ## Title and Summary
 
 **PawPal+ with RAG-powered Health Q&A**
