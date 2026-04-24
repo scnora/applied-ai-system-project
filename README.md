@@ -1,26 +1,17 @@
 # PawPal+ 🐾 — AI-Enhanced Pet Care Planner
 
 
-**Original project name:** PawPal+ (Modules 1–3)
+**Original project name:** PawPal+ (Modules 4)
 
 PawPal+ was built as a Streamlit app to help busy pet owners manage daily care tasks across multiple pets. The original system allowed users to enter owner and pet information, add care tasks with priorities and durations, and generate a daily schedule using a rule-based `Scheduler` class. It included smart features like medical priority boosting, conflict detection, automatic task recurrence, and chronological sorting 
 ---
-
-
-
-This is a short preview of how PawPal+ works <br>
-(I apologize for the high speed and low quality, Github only allowed me to upload files under 10MB. A better quality video is in my assets folder).<br>
-https://github.com/user-attachments/assets/4d130cb9-2f0e-4aae-85cb-a484d1fae016
-
-
-
 
 
 ## Title and Summary
 
 **PawPal+ with RAG-powered Health Q&A**
 
-This module adds a Retrieval-Augmented Generation (RAG) feature to the original PawPal+ scheduler. When a pet owner types a health question about their pet (e.g. *"why is my dog so tired after walks?"*), the system retrieves that pet's logged tasks, medical conditions, breed, and species from the existing data model — and passes all of it to Claude as context before generating a response. This means the AI never answers generically; it always answers with *your specific pet's data* in front of it.
+This module adds a Retrieval-Augmented Generation (RAG) feature to the original PawPal+ scheduler. When a pet owner types a health question about their pet (e.g. *"why is my dog so tired after walks?"*), the system retrieves that pet's logged tasks, medical conditions, breed, and species from the existing data model and passes all of it to Claude as context before generating a response. This means the AI never answers generically; it always answers with *your specific pet's data* in front of it.
 
 This matters because general pet health advice can be misleading or even harmful if it ignores a pet's individual profile. A dog with arthritis needs very different guidance than a healthy puppy, and RAG makes that distinction automatic.
 
@@ -36,8 +27,8 @@ The system follows a four-stage RAG pipeline:
 4. **Human review** — the owner reads the response and decides whether to act on it. No action is taken automatically; the owner is always the final decision-maker.
 
 
-<img src="/assets/image.png" alt="Alt text" width="200">
----
+<img src="/assets/diagram.png" alt="Diagram Image" width="200">
+
 
 ## Setup Instructions
 
@@ -85,6 +76,12 @@ python -m pytest tests/ -v
 
 ## Sample Interactions
 
+
+This is a short preview of how PawPal+ works <br>
+(I apologize for the high speed and low quality, Github only allowed me to upload files under 10MB. A better quality video is in my assets folder).<br>
+https://github.com/user-attachments/assets/4d130cb9-2f0e-4aae-85cb-a484d1fae016
+
+
 ### Example 1 — Dog with a medical condition
 
 **Pet profile:** Mochi, 3-year-old Shiba Inu, medical condition: arthritis. Recent tasks: morning walk (20 min), joint medication (5 min).
@@ -107,17 +104,7 @@ python -m pytest tests/ -v
 **AI response (paraphrased):**
 > Increased water intake in cats — especially Siamese, who are prone to kidney and thyroid issues — can sometimes be an early sign worth monitoring. Luna's logs don't show any current medical conditions, which is a good sign, but this is one of those symptoms that warrants a vet check rather than a wait-and-see approach. You could log a vet visit task in the scheduler to stay on top of it.
 
----
 
-### Example 3 — General care question
-
-**Pet profile:** Mochi, Shiba Inu, arthritis.
-
-**User question:**
-> "What's a good enrichment activity for Mochi that won't stress his joints?"
-
-**AI response (paraphrased):**
-> Given Mochi's arthritis, high-impact activities like fetch or agility courses are best avoided. Low-strain enrichment works well for Shibas — nose work games, sniff walks (where the dog leads at their own pace), and puzzle feeders are all great options that engage the brain without putting stress on the joints. These can be added as enrichment tasks in the scheduler.
 
 ---
 
@@ -142,22 +129,21 @@ The current implementation passes all of a pet's tasks as context. For pets with
 **What worked:**
 - The core scheduling logic tests all pass: task completion, priority sorting, conflict detection, recurrence, and filtering all behave as expected.
 - The RAG prompt reliably includes the pet's medical conditions in responses when they are present in the profile.
-- Claude correctly declines to give definitive medical diagnoses and consistently recommends consulting a vet for serious symptoms.
 
 **What didn't work / limitations:**
 - The AI occasionally gives advice that is slightly generic when the breed is uncommon or not in the knowledge base. Adding more breed entries would improve this.
 - There is no automated test for the AI response content itself — verifying that the response mentions the pet's name or condition requires a manual check.
-- Edge case: if a user adds a pet but no tasks yet, the retrieved context is sparse, and the AI response is less personalized.
+
 
 **What I learned:**
-- Prompt structure matters more than prompt length. A clearly labeled context block ("Here is the pet's profile: ...") produced better responses than dumping all the data as a paragraph.
+- Prompt structure matters more than prompt length. A clearly labeled context block produced better responses than dumping all the data as a paragraph.
 - Testing AI outputs is fundamentally different from testing deterministic code. Consistency checks (does the response always mention the condition?) are more practical than exact-match assertions.
 
 ---
 
 ## Reflection
 
-Building this project made the difference between a chatbot and a RAG system feel very concrete. Before, "retrieval-augmented generation" sounded abstract — after wiring up the retriever to pull from the existing `Pet` dataclass and watching Claude give a different answer for a dog with arthritis versus a healthy dog, the mechanism clicked.
+Building this project made the difference between a chatbot and a RAG system feel very concrete. Before, "retrieval-augmented generation" sounded abstract then after wiring up the retriever to pull from the existing `Pet` dataclass and watching Claude give a different answer for a dog with arthritis vs a healthy dog, the mechanism clicked.
 
 The most surprising lesson was how much the quality of retrieved context affects the quality of the response. When the context was vague ("the dog has some health issues"), the response was vague. When it was specific ("Mochi, 3-year-old Shiba Inu, arthritis, 20-min morning walks"), the response was noticeably more useful and actionable.
 
