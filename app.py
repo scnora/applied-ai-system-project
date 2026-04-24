@@ -1,5 +1,6 @@
 import streamlit as st
 from pawpal_system import Owner, Pet, Task, TaskType, Scheduler
+from rag_advisor import ask_pawpal_advisor
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 st.title("🐾 PawPal+")
@@ -228,3 +229,34 @@ if st.button("Generate Schedule"):
         # ── Full text explanation ─────────────────────────────────────────────
         with st.expander("Full plan explanation"):
             st.text(scheduler.explain_plan())
+
+st.divider()
+
+# ── Section 5: RAG-powered Health Q&A ────────────────────────────────────────
+if owner.pets:
+    st.subheader("Ask the AI about your pet")
+
+    selected_qa_pet = st.selectbox(
+        "Which pet do you have a question about?",
+        [p.name for p in owner.pets],
+        key="qa_pet",
+    )
+    user_question = st.text_input(
+        "Your question",
+        placeholder="e.g. Is my dog getting enough exercise?",
+        key="qa_question",
+    )
+
+    if st.button("Ask PawPal+"):
+        if not user_question.strip():
+            st.warning("Please enter a question first.")
+        else:
+            pet_obj = next(p for p in owner.pets if p.name == selected_qa_pet)
+            with st.spinner("Consulting the AI advisor..."):
+                answer = ask_pawpal_advisor(pet_obj, user_question.strip())
+            st.info(answer)
+
+    st.caption(
+        "AI responses are for informational purposes only and are not a substitute "
+        "for professional veterinary advice."
+    )
