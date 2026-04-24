@@ -9,6 +9,7 @@ PawPal+ was built as a Streamlit app to help busy pet owners manage daily care t
 
 
 This is a short preview of how PawPal+ works <br>
+(I apologize for the high speed and low quality, Github only allowed me to upload files under 10MB. A better quality video is in my assets folder).<br>
 https://github.com/user-attachments/assets/4d130cb9-2f0e-4aae-85cb-a484d1fae016
 
 
